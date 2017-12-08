@@ -63,10 +63,11 @@ exec(char *path, char **argv)
   // Allocate two pages at the next page boundary.
   // Make the first inaccessible.  Use the second as the user stack.
   sz = PGROUNDUP(sz);
-
-  if(allocuvm(pgdir, KERNBASE - PGSIZE, KERNBASE - PGSIZE + 1) == 0)
+  int test;
+  if((test = allocuvm(pgdir, KERNBASE - PGSIZE, KERNBASE - PGSIZE + 1)) == 0)
     goto bad;
   sp = USERSTACK;
+  cprintf("alloc: %x", test);
 
   // Push argument strings, prepare rest of stack in ustack.
   for(argc = 0; argv[argc]; argc++) {
