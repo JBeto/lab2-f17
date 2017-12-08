@@ -13,13 +13,22 @@
 // library system call function. The saved user %esp points
 // to a saved program counter, and then the first argument.
 
+// Returns 1 if addr is not in stack
+int
+notstack(uint addr, int sz) 
+{
+  if (sz < 0 || addr > USERSTACK || addr - sz > USERSTACK)
+    return 1;
+  struct proc *curproc = myproc();
+  uint stacktop = KERNBASE - (curproc->pgcount * PGSIZE);
+  return (addr - sz < stacktop || addr < stacktop);
+}
+
 // Fetch the int at addr from the current process.
 int
 fetchint(uint addr, int *ip)
 {
-  struct proc *curproc = myproc();
-
-  if(addr >= curproc->sz || addr+4 > curproc->sz)
+  if(notstack(addr, 4))
     return -1;
   *ip = *(int*)(addr);
   return 0;
@@ -34,13 +43,13 @@ fetchstr(uint addr, char **pp)
   char *s, *ep;
   struct proc *curproc = myproc();
 
-  if(addr >= curproc->sz)
+  if(notstack(addr, 0))
     return -1;
   *pp = (char*)addr;
-  ep = (char*)curproc->sz;
-  for(s = *pp; s < ep; s++){
+  ep = (char*)(KERNBASE - (curproc->pgcount * PGSIZE));
+  for(s = *pp; s >= ep; s--){
     if(*s == 0)
-      return s - *pp;
+      return *pp - s;
   }
   return -1;
 }
@@ -59,11 +68,9 @@ int
 argptr(int n, char **pp, int size)
 {
   int i;
-  struct proc *curproc = myproc();
- 
   if(argint(n, &i) < 0)
     return -1;
-  if(size < 0 || (uint)i >= curproc->sz || (uint)i+size > curproc->sz)
+  if(notstack((uint)i, size))
     return -1;
   *pp = (char*)i;
   return 0;
