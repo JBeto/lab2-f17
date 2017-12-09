@@ -17,11 +17,14 @@
 int
 notstack(uint addr, int sz) 
 {
-  if (sz < 0 || addr > USERSTACK || addr - sz > USERSTACK)
+  if (sz < 0 || addr >= KERNBASE || addr + sz >= KERNBASE)
     return 1;
+  return 0;
+  /*
   struct proc *curproc = myproc();
   uint stacktop = KERNBASE - (curproc->pgcount * PGSIZE);
   return (addr - sz < stacktop || addr < stacktop);
+  */
 }
 
 // Fetch the int at addr from the current process.
@@ -36,20 +39,17 @@ fetchint(uint addr, int *ip)
 
 // Fetch the nul-terminated string at addr from the current process.
 // Doesn't actually copy the string - just sets *pp to point at it.
-// Returns length of string, not including nul.
+// Returns length of string, not including null.
 int
 fetchstr(uint addr, char **pp)
 {
-  char *s, *ep;
-  struct proc *curproc = myproc();
-
+  char *s;
   if(notstack(addr, 0))
     return -1;
   *pp = (char*)addr;
-  ep = (char*)(KERNBASE - (curproc->pgcount * PGSIZE));
-  for(s = *pp; s >= ep; s--){
+  for(s = *pp; s <= (char*)USERSTACK; s++) {
     if(*s == 0)
-      return *pp - s;
+      return s - *pp;
   }
   return -1;
 }
