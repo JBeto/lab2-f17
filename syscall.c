@@ -15,23 +15,16 @@
 
 // Returns 1 if addr is not in stack
 int
-notstack(uint addr, int sz) 
+inkernel(uint addr, int sz) 
 {
-  if (sz < 0 || addr >= KERNBASE || addr + sz >= KERNBASE)
-    return 1;
-  return 0;
-  /*
-  struct proc *curproc = myproc();
-  uint stacktop = KERNBASE - (curproc->pgcount * PGSIZE);
-  return (addr - sz < stacktop || addr < stacktop);
-  */
+  return (sz < 0 || addr >= KERNBASE || addr - sz >= KERNBASE);
 }
 
 // Fetch the int at addr from the current process.
 int
 fetchint(uint addr, int *ip)
 {
-  if(notstack(addr, 4))
+  if(inkernel(addr, 4))
     return -1;
   *ip = *(int*)(addr);
   return 0;
@@ -44,10 +37,10 @@ int
 fetchstr(uint addr, char **pp)
 {
   char *s;
-  if(notstack(addr, 0))
+  if(inkernel(addr, 0))
     return -1;
   *pp = (char*)addr;
-  for(s = *pp; s <= (char*)USERSTACK; s++) {
+  for(s = *pp; s < (char*)KERNBASE; s++) {
     if(*s == 0)
       return s - *pp;
   }
@@ -70,7 +63,7 @@ argptr(int n, char **pp, int size)
   int i;
   if(argint(n, &i) < 0)
     return -1;
-  if(notstack((uint)i, size))
+  if(inkernel((uint)i, size))
     return -1;
   *pp = (char*)i;
   return 0;
