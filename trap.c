@@ -46,21 +46,23 @@ trap(struct trapframe *tf)
     return;
   }
 
-  switch(tf->trapno){
-  case T_PGFLT:
-    uint fltaddr = rcr2();
-    struct proc *curproc = myproc();
-    uint endofstack = KERNBASE - (curproc->pgcount * PGSIZE);
-    
-    if (fltaddr < endofstack) {
-      uint newstack = endofstack - (2 * PGSIZE);
-      if(allocuvm(curproc->pgdir, newstack, endofstack) == 0) {
+  switch(tf->trapno){ 
+  case T_PGFLT: 
+    if ((rcr2() < KERNBASE - (myproc()->pgcount * PGSIZE))) {//  && (rcr2() >= KERNBASE - ((myproc()->pgcount + 1) * PGSIZE))) {
+      cprintf("value: %x\n", rcr2());
+      cprintf("higher_bound: %x\n", KERNBASE - (myproc()->pgcount * PGSIZE ));
+      cprintf("lower_bound: %x\n", KERNBASE - ((myproc()->pgcount + 1) * PGSIZE));
+      myproc()->pgcount++;
+      givepteu(myproc()->pgdir, (char*)(KERNBASE - (myproc()->pgcount * PGSIZE)));
+      if(allocuvm(myproc()->pgdir, KERNBASE - ((myproc()->pgcount + 1) * PGSIZE), KERNBASE - (myproc()->pgcount * PGSIZE)) == 0) {
         cprintf("Stack overflow");
-      }  
-      clearpteu(curproc->pgdir, (char*)newstack);
-      curproc->pgcount++;
+      } 
+      else {
+       clearpteu(myproc()->pgdir, (char*)(KERNBASE - ((myproc()->pgcount + 1) * PGSIZE)));
+       cprintf("Fault handled\n");
+      }
     }
-    break;
+    break; 
   case T_IRQ0 + IRQ_TIMER:
     if(cpuid() == 0){
       acquire(&tickslock);

@@ -303,11 +303,20 @@ void
 clearpteu(pde_t *pgdir, char *uva)
 {
   pte_t *pte;
-
   pte = walkpgdir(pgdir, uva, 0);
   if(pte == 0)
     panic("clearpteu");
-  *pte &= ~PTE_U;
+  *pte &= ~PTE_U; 
+}
+
+void
+givepteu(pde_t *pgdir, char *uva)
+{
+  pte_t *pte;
+  pte = walkpgdir(pgdir, uva, 0);
+  if (pte == 0)
+    panic("givepteu");
+  *pte |= PTE_U;
 }
 
 // Given a parent process's page table, create a copy
