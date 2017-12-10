@@ -67,6 +67,7 @@ exec(char *path, char **argv)
   if(allocuvm(pgdir, stack, USERSTACK) == 0)
     goto bad;
   clearpteu(pgdir, (char*)stack);
+  curproc->pgcount = 1;
   sp = USERSTACK;
 
   // Push argument strings, prepare rest of stack in ustack.

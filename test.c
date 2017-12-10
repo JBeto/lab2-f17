@@ -5,7 +5,7 @@
 int test(int n)
 {
    //if(n<100) 
-   if(n<200) 
+   if(n<500) 
    test(n+1);
    return n;
 }
@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
    //printf(1, "address %x\n", &x);
    test(1);
    printf(1, "Finished child\n");
-   exec("null",0);
+   //exec("null",0);
    exit();
    }
    wait();
