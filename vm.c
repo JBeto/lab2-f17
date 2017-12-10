@@ -303,11 +303,20 @@ void
 clearpteu(pde_t *pgdir, char *uva)
 {
   pte_t *pte;
-
   pte = walkpgdir(pgdir, uva, 0);
   if(pte == 0)
     panic("clearpteu");
-  *pte &= ~PTE_U;
+  *pte &= ~PTE_U; 
+}
+
+void
+givepteu(pde_t *pgdir, char *uva)
+{
+  pte_t *pte;
+  pte = walkpgdir(pgdir, uva, 0);
+  if (pte == 0)
+    panic("givepteu");
+  *pte |= PTE_U;
 }
 
 // Given a parent process's page table, create a copy
@@ -336,7 +345,7 @@ copyuvm(pde_t *pgdir, uint sz)
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0)
       goto bad;
   }
-  for(i = KERNBASE - (curproc->pgcount * PGSIZE); i < KERNBASE; i += PGSIZE){
+  for(i = KERNBASE - ((curproc->pgcount + 1)* PGSIZE); i < KERNBASE; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
       panic("copyuvm: pte should exist");
     if(!(*pte & PTE_P))

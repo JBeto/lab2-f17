@@ -13,22 +13,11 @@
 // library system call function. The saved user %esp points
 // to a saved program counter, and then the first argument.
 
-// Returns 1 if addr is not in stack
-int
-notstack(uint addr, int sz) 
-{
-  if (sz < 0 || addr > USERSTACK || addr - sz > USERSTACK)
-    return 1;
-  struct proc *curproc = myproc();
-  uint stacktop = KERNBASE - (curproc->pgcount * PGSIZE);
-  return (addr - sz < stacktop || addr < stacktop);
-}
-
 // Fetch the int at addr from the current process.
 int
 fetchint(uint addr, int *ip)
 {
-  if(notstack(addr, 4))
+  if(addr >= KERNBASE || addr+4 > KERNBASE)
     return -1;
   *ip = *(int*)(addr);
   return 0;
@@ -36,20 +25,18 @@ fetchint(uint addr, int *ip)
 
 // Fetch the nul-terminated string at addr from the current process.
 // Doesn't actually copy the string - just sets *pp to point at it.
-// Returns length of string, not including nul.
+// Returns length of string, not including null.
 int
 fetchstr(uint addr, char **pp)
 {
   char *s, *ep;
-  struct proc *curproc = myproc();
-
-  if(notstack(addr, 0))
+  if(addr >= KERNBASE)
     return -1;
   *pp = (char*)addr;
-  ep = (char*)(KERNBASE - (curproc->pgcount * PGSIZE));
-  for(s = *pp; s >= ep; s--){
+  ep = (char*)KERNBASE;
+  for(s = *pp; s < ep; s++) {
     if(*s == 0)
-      return *pp - s;
+      return s - *pp;
   }
   return -1;
 }
@@ -70,7 +57,7 @@ argptr(int n, char **pp, int size)
   int i;
   if(argint(n, &i) < 0)
     return -1;
-  if(notstack((uint)i, size))
+  if(size < 0 || (uint)i >= KERNBASE || (uint)i+size > KERNBASE)
     return -1;
   *pp = (char*)i;
   return 0;

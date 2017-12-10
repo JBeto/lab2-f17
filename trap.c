@@ -46,7 +46,7 @@ trap(struct trapframe *tf)
     return;
   }
 
-  switch(tf->trapno){
+  switch(tf->trapno){ 
   case T_IRQ0 + IRQ_TIMER:
     if(cpuid() == 0){
       acquire(&tickslock);
@@ -77,7 +77,22 @@ trap(struct trapframe *tf)
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
     break;
-
+  case T_PGFLT: 
+    if (rcr2() < KERNBASE - (myproc()->pgcount * PGSIZE) && rcr2() >= KERNBASE - ((myproc()->pgcount + 1) * PGSIZE)) {
+      myproc()->pgcount++;
+      givepteu(myproc()->pgdir, (char*)(KERNBASE - (myproc()->pgcount * PGSIZE)));
+      if(allocuvm(myproc()->pgdir, KERNBASE - ((myproc()->pgcount + 1) * PGSIZE), KERNBASE - (myproc()->pgcount * PGSIZE)) == 0) {
+        cprintf("Stack overflow");
+        exit();
+      } 
+      else {
+       clearpteu(myproc()->pgdir, (char*)(KERNBASE - ((myproc()->pgcount + 1) * PGSIZE)));
+       cprintf("Fault handled\n");
+      }
+      break;
+    }
+    // else, fall through to default
+    //
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
