@@ -47,6 +47,20 @@ trap(struct trapframe *tf)
   }
 
   switch(tf->trapno){
+  case T_PGFLT:
+    uint fltaddr = rcr2();
+    struct proc *curproc = myproc();
+    uint endofstack = KERNBASE - (curproc->pgcount * PGSIZE);
+    
+    if (fltaddr < endofstack) {
+      uint newstack = endofstack - (2 * PGSIZE);
+      if(allocuvm(curproc->pgdir, newstack, endofstack) == 0) {
+        cprintf("Stack overflow");
+      }  
+      clearpteu(curproc->pgdir, (char*)newstack);
+      curproc->pgcount++;
+    }
+    break;
   case T_IRQ0 + IRQ_TIMER:
     if(cpuid() == 0){
       acquire(&tickslock);
