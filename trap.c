@@ -92,9 +92,6 @@ trap(struct trapframe *tf)
       }
       break;
     }
-    else {
-      cprintf("Address: %x, PGCOUNT: %x\n", rcr2(), myproc()->pgcount);
-    }
     // else, fall through to default
     //
   //PAGEBREAK: 13

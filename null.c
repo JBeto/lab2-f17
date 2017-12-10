@@ -4,13 +4,12 @@
 
 int main(int argc, char *argv[])
 {
-/*
 int *i = 0;
 
 (*i)++;
 
 printf(1,"Hi %d",*i);
-*/
+//exit();
 return 1;
 }
 
