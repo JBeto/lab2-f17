@@ -82,14 +82,18 @@ trap(struct trapframe *tf)
       myproc()->pgcount++;
       givepteu(myproc()->pgdir, (char*)(KERNBASE - (myproc()->pgcount * PGSIZE)));
       if(allocuvm(myproc()->pgdir, KERNBASE - ((myproc()->pgcount + 1) * PGSIZE), KERNBASE - (myproc()->pgcount * PGSIZE)) == 0) {
-        cprintf("Stack overflow");
+        cprintf("Stack Overflow\n");
+        //cprintf("Address: %x\n", rcr2());
         exit();
       } 
       else {
        clearpteu(myproc()->pgdir, (char*)(KERNBASE - ((myproc()->pgcount + 1) * PGSIZE)));
-       cprintf("Fault handled\n");
+       //cprintf("Fault handled\n");
       }
       break;
+    }
+    else {
+      cprintf("Address: %x, PGCOUNT: %x\n", rcr2(), myproc()->pgcount);
     }
     // else, fall through to default
     //
