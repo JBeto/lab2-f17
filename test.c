@@ -5,12 +5,20 @@
 int test(int n)
 {
    //if(n<100) 
-   if(n<1000) {
+   //if(n<100) {
    printf(1, "%x\n", &n);
    test(n+1);
+   test(n+1);
+   test(n+1);
+   test(n+1);
+   test(n+1);
+   test(n+1);
+   test(n+1);
+   test(n+1);
+   test(n+1);
    return n;
-   }
-   return 0; 
+  // }
+  // return 0; 
 }
 int main(int argc, char *argv[])
 {

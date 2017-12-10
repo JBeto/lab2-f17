@@ -88,7 +88,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-  
+  p->pgcount = 1; 
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -189,6 +189,8 @@ fork(void)
     return -1;
   }
 
+  
+  np->pgcount = curproc->pgcount;
   // Copy process state from proc.
   if((np->pgdir = copyuvm(curproc->pgdir, curproc->sz)) == 0){
     kfree(np->kstack);

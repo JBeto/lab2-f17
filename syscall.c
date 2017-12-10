@@ -13,18 +13,11 @@
 // library system call function. The saved user %esp points
 // to a saved program counter, and then the first argument.
 
-// Returns 1 if addr is not in stack
-int
-inkernel(uint addr, int sz) 
-{
-  return (sz < 0 || addr >= KERNBASE || addr - sz >= KERNBASE);
-}
-
 // Fetch the int at addr from the current process.
 int
 fetchint(uint addr, int *ip)
 {
-  if(inkernel(addr, 4))
+  if(addr >= KERNBASE || addr+4 > KERNBASE)
     return -1;
   *ip = *(int*)(addr);
   return 0;
@@ -36,11 +29,12 @@ fetchint(uint addr, int *ip)
 int
 fetchstr(uint addr, char **pp)
 {
-  char *s;
-  if(inkernel(addr, 0))
+  char *s, *ep;
+  if(addr >= KERNBASE)
     return -1;
   *pp = (char*)addr;
-  for(s = *pp; s < (char*)KERNBASE; s++) {
+  ep = (char*)KERNBASE;
+  for(s = *pp; s < ep; s++) {
     if(*s == 0)
       return s - *pp;
   }
@@ -63,7 +57,7 @@ argptr(int n, char **pp, int size)
   int i;
   if(argint(n, &i) < 0)
     return -1;
-  if(inkernel((uint)i, size))
+  if(size < 0 || (uint)i >= KERNBASE || (uint)i+size > KERNBASE)
     return -1;
   *pp = (char*)i;
   return 0;
