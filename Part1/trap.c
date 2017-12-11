@@ -77,6 +77,7 @@ trap(struct trapframe *tf)
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
     break;
+  //cs 153
   case T_PGFLT: 
     if (rcr2() < KERNBASE - (myproc()->pgcount * PGSIZE) && rcr2() >= KERNBASE - ((myproc()->pgcount + 1) * PGSIZE)) {
       myproc()->pgcount++;

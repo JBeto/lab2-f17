@@ -158,7 +158,7 @@ mkfs: mkfs.c fs.h
 # details:
 # http://www.gnu.org/software/make/manual/html_node/Chained-Rules.html
 .PRECIOUS: %.o
-
+#cs 153
 UPROGS=\
 	_cat\
 	_echo\
@@ -167,7 +167,7 @@ UPROGS=\
 	_init\
 	_kill\
 	_ln\
-        _test\
+    _test\
 	_ls\
 	_mkdir\
 	_rm\

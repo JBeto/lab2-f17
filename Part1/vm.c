@@ -309,6 +309,7 @@ clearpteu(pde_t *pgdir, char *uva)
   *pte &= ~PTE_U; 
 }
 
+//cs 153
 void
 givepteu(pde_t *pgdir, char *uva)
 {
@@ -345,6 +346,7 @@ copyuvm(pde_t *pgdir, uint sz)
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0)
       goto bad;
   }
+  //cs 153
   for(i = KERNBASE - ((curproc->pgcount + 1)* PGSIZE); i < KERNBASE; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
       panic("copyuvm: pte should exist");
