@@ -27,7 +27,7 @@ void shminit() {
   }
   release(&(shm_table.lock));
 }
-//cs153 Added shm_open implementation.
+//cs 153 Added shm_open implementation.
 int shm_open(int id, char **pointer) {
 
 int i;
@@ -76,7 +76,7 @@ for(i = 0; i < 63; ++i)
 return 0; //added to remove compiler warning -- you should decide what to return
 }
 
-//cs153 Added shm_close implementation.
+//cs 153 Added shm_close implementation.
 int shm_close(int id) {
 
 int i;
